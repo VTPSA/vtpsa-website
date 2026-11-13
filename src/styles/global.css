@@ -1,0 +1,9 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-blue: #0139de;
+  --color-brand-blue-light: #0444fd;
+  --color-brand-orange: #fe8e03;
+  --color-brand-red: #f30102;
+  --font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial, sans-serif;
+}
