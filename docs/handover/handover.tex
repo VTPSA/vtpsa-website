@@ -1,0 +1,175 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{xcolor}
+
+\hypersetup{colorlinks=true, linkcolor=blue!50!black, urlcolor=blue!50!black}
+
+\lstset{
+  basicstyle=\ttfamily\small,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{gray!8},
+  rulecolor=\color{gray!50},
+  columns=fullflexible
+}
+
+\title{VTPSA Website: Technical Handover Notes\\
+\large Part 1: Architecture and Initial Setup}
+\author{}
+\date{12 November 2026}
+
+\begin{document}
+\maketitle
+
+\section{Overview}
+The VTPSA website is a static website that publishes results logs, club details,
+documents (constitution, rulebooks, minutes, reports) and photo galleries.
+All content lives as files in a Git repository. There is no database and no
+server-side code. The site is rebuilt and published automatically whenever
+changes are pushed to the \texttt{main} branch.
+
+\begin{itemize}[nosep]
+  \item \textbf{Live site:} \url{https://vtpsa.github.io}
+  \item \textbf{Repository:} \url{https://github.com/VTPSA/vtpsa.github.io}
+\end{itemize}
+
+\section{Design decisions and rationale}
+\begin{description}[leftmargin=0pt, style=nextline]
+  \item[Static site instead of a database-backed web application.]
+  The content volume is small (about 20 documents, 20 photos and a few result
+  tables per year) and changes rarely. A static site has no running costs, no
+  security surface and no moving parts to maintain.
+
+  \item[GitHub Pages hosting instead of Firebase.]
+  Since February 2026, Cloud Storage for Firebase requires the pay-as-you-go
+  Blaze plan, which needs a payment card and has no hard spending cap. The
+  organisation pays by EFT and has no card. GitHub Pages is free for public
+  repositories and needs no payment details.
+
+  \item[Content stored in Git.]
+  Every change to results, documents or photos is a commit with an author and
+  date, which gives a complete history and makes handover to a new maintainer
+  straightforward.
+
+  \item[Astro as the site generator.]
+  Astro builds plain HTML pages from components and content files, and can
+  generate pages directly from data such as club files and results tables.
+\end{description}
+
+\section{Technology stack}
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Component} & \textbf{Choice} \\
+\midrule
+Site generator & Astro (exact version in \texttt{package.json}) \\
+Runtime & Node.js 22.23.4 or newer (the build pipeline uses Node 24) \\
+Package manager & npm (\texttt{package-lock.json} must stay committed) \\
+Hosting & GitHub Pages \\
+Build and deploy & GitHub Actions \\
+Version control client & GitHub Desktop \\
+Editor & Visual Studio Code \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Repository and configuration}
+The repository is owned by the GitHub organisation \texttt{VTPSA}, not by an
+individual, so ownership survives a change of maintainer. It is public and
+named exactly \texttt{vtpsa.github.io}; this special name makes GitHub publish
+it at the root address with no path suffix.
+
+Key files:
+\begin{itemize}[nosep]
+  \item \texttt{astro.config.mjs}: sets \texttt{site} to
+        \texttt{https://vtpsa.github.io}. No \texttt{base} value is needed
+        because the site is served from the root.
+  \item \texttt{package.json} and \texttt{package-lock.json}: dependencies and
+        their exact versions.
+  \item \texttt{src/pages/}: each file here becomes a page of the site.
+  \item \texttt{public/}: files copied to the site unchanged (for example PDFs
+        and logos).
+  \item \texttt{.github/workflows/deploy.yml}: the build and deploy pipeline.
+\end{itemize}
+
+\section{Deployment pipeline}
+The workflow in \texttt{.github/workflows/deploy.yml} runs on every push to
+\texttt{main} and can also be started manually from the Actions tab of the
+repository. It has two jobs:
+\begin{enumerate}[nosep]
+  \item \textbf{build}: checks out the code, then runs the official
+        \texttt{withastro/action}, which installs dependencies, builds the site
+        and uploads the result. The Node version is set explicitly:
+\begin{lstlisting}
+- name: Install, build, and upload your site
+  uses: withastro/action@v3
+  with:
+    node-version: 24
+\end{lstlisting}
+  \item \textbf{deploy}: publishes the built site using
+        \texttt{actions/deploy-pages}.
+\end{enumerate}
+In the repository settings, \textbf{Settings $\rightarrow$ Pages $\rightarrow$
+Source} must be set to \textbf{GitHub Actions}. Publishing a change normally
+takes one to two minutes after the push.
+
+\section{Local development workflow}
+The project is kept outside OneDrive (for example in
+\texttt{C:\textbackslash Projects}) because the \texttt{node\_}\texttt{modules}
+folder contains thousands of small files that sync tools handle badly. The
+normal cycle is:
+\begin{enumerate}[nosep]
+  \item Open the project folder in Visual Studio Code.
+  \item Run the site locally from the project folder with
+        \texttt{npm run dev} and view it at \texttt{http://localhost:4321}.
+  \item Edit files and check the result in the browser.
+  \item Commit and push using GitHub Desktop. The site then rebuilds and
+        publishes automatically.
+\end{enumerate}
+
+\section{Problems encountered and their fixes}
+\begin{center}
+\small
+\begin{tabular}{@{}p{0.36\textwidth}p{0.56\textwidth}@{}}
+\toprule
+\textbf{Problem} & \textbf{Cause and fix} \\
+\midrule
+Astro setup wizard looped in Git Bash &
+Interactive prompts do not work in Git Bash. Use PowerShell and pass the
+answers as command-line options. \\
+\addlinespace
+\texttt{npm} blocked in PowerShell &
+Script execution is disabled by default on Windows. Fixed with
+\texttt{Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned}. \\
+\addlinespace
+Build failed: ``Node.js v20 is not supported'' &
+The Astro action defaults to Node 20 but this Astro version needs Node 22.23.4
+or newer. Fixed by setting \texttt{node-version: 24} in the workflow. \\
+\addlinespace
+``Site not found'' at the root address &
+The repository was not named \texttt{vtpsa.github.io}. Renamed it and re-ran
+the workflow. \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Notes for the next maintainer}
+\begin{itemize}[nosep]
+  \item Keep the GitHub organisation owned by at least two people, and use an
+        organisational contact email where possible.
+  \item Do not delete \texttt{package-lock.json}; the build pipeline relies on it.
+  \item If a build fails, open the repository's Actions tab, click the failed
+        run, and read the log of the failing step.
+  \item Version numbers in the workflow file (for example
+        \texttt{withastro/action@v3}) may need updating over time; check the
+        current Astro deployment guide.
+\end{itemize}
+
+\end{document}
