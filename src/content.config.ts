@@ -1,5 +1,5 @@
 import { defineCollection } from "astro:content";
-import { glob } from "astro/loaders";
+import { glob, file } from "astro/loaders";
 import { z } from "astro/zod";
 
 const clubs = defineCollection({
@@ -18,4 +18,14 @@ const clubs = defineCollection({
     }),
 });
 
-export const collections = { clubs };
+const documents = defineCollection({
+  loader: file("./src/data/documents.json"),
+  schema: z.object({
+    title: z.string(),
+    category: z.enum(["constitution", "rulebooks", "minutes", "reports"]),
+    date: z.coerce.date(),
+    file: z.string().startsWith("/documents/"),
+  }),
+});
+
+export const collections = { clubs, documents };

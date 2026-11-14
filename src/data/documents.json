@@ -1,0 +1,37 @@
+[
+  {
+    "id": "constitution",
+    "title": "VTPSA Constitution",
+    "category": "constitution",
+    "date": "2025-02-15",
+    "file": "/documents/constitution/constitution.pdf"
+  },
+  {
+    "id": "common-rules",
+    "title": "Common Rules",
+    "category": "rulebooks",
+    "date": "2026-01-10",
+    "file": "/documents/rulebooks/common-rules.pdf"
+  },
+  {
+    "id": "minutes-2026-03-agm",
+    "title": "AGM Minutes",
+    "category": "minutes",
+    "date": "2026-03-14",
+    "file": "/documents/minutes/2026-03-agm-minutes.pdf"
+  },
+  {
+    "id": "minutes-2025-09-committee",
+    "title": "Committee Meeting Minutes",
+    "category": "minutes",
+    "date": "2025-09-20",
+    "file": "/documents/minutes/2025-09-committee-minutes.pdf"
+  },
+  {
+    "id": "report-2025-financial",
+    "title": "Financial Report 2025",
+    "category": "reports",
+    "date": "2026-02-28",
+    "file": "/documents/reports/2025-financial-report.pdf"
+  }
+]

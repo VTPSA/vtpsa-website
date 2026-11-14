@@ -1,8 +1,68 @@
 ---
+import { getCollection } from "astro:content";
+import { statSync } from "node:fs";
+import { join } from "node:path";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const categories = [
+  { key: "constitution", label: "Constitution" },
+  { key: "rulebooks", label: "Rulebooks" },
+  { key: "minutes", label: "Minutes" },
+  { key: "reports", label: "Reports" },
+] as const;
+
+const entries = await getCollection("documents");
+
+function fileSize(path: string, title: string) {
+  try {
+    const bytes = statSync(join(process.cwd(), "public", path)).size;
+    return bytes < 1024 * 1024
+      ? `${Math.round(bytes / 1024)} KB`
+      : `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  } catch {
+    throw new Error(
+      `Document "${title}" points to ${path}, but no such file exists in public/.`
+    );
+  }
+}
+
+const groups = categories
+  .map(({ key, label }) => ({
+    label,
+    docs: entries
+      .filter((e) => e.data.category === key)
+      .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+      .map((e) => ({ ...e.data, size: fileSize(e.data.file, e.data.title) })),
+  }))
+  .filter((g) => g.docs.length > 0);
+
+const dateFormat = new Intl.DateTimeFormat("en-ZA", {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+  timeZone: "UTC",
+});
 ---
 
 <BaseLayout title="Documents">
-  <h1 class="text-3xl font-bold text-brand-blue">Clubs</h1>
-  <p class="mt-4">Coming soon.</p>
+  <h1 class="text-3xl font-bold text-brand-blue">Documents</h1>
+  <p class="mt-4">Official documents of the VTPSA. Select a title to open the PDF.</p>
+
+  {groups.map((group) => (
+    <section class="mt-10">
+      <h2 class="border-b-2 border-brand-red pb-1 text-2xl font-semibold text-brand-blue">
+        {group.label}
+      </h2>
+      <ul class="mt-4 divide-y divide-gray-200">
+        {group.docs.map((doc) => (
+          <li class="flex flex-wrap items-baseline justify-between gap-x-4 py-3">
+            <a href={doc.file} class="font-semibold text-brand-blue underline">{doc.title}</a>
+            <span class="text-sm text-gray-600">
+              {dateFormat.format(doc.date)} · PDF, {doc.size}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
 </BaseLayout>
