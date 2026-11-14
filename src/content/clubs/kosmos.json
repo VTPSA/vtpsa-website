@@ -1,0 +1,9 @@
+{
+  "name": "Cosmos Shooting Club",
+  "logo": "./cosmos.png",
+  "location": "Town, Province",
+  "contact": {
+    "name": "Firstname Surname",
+    "email": "beta@example.com"
+  }
+}

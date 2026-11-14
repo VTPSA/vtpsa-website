@@ -1,8 +1,64 @@
 ---
+import { getCollection } from "astro:content";
+import { Image } from "astro:assets";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const clubs = (await getCollection("clubs")).sort((a, b) =>
+  a.data.name.localeCompare(b.data.name)
+);
 ---
 
 <BaseLayout title="Clubs">
   <h1 class="text-3xl font-bold text-brand-blue">Clubs</h1>
-  <p class="mt-4">Coming soon.</p>
+  <p class="mt-4">Clubs affiliated to the VTPSA.</p>
+
+  <ul class="mt-8 grid gap-6 sm:grid-cols-2">
+    {clubs.map(({ data: club }) => (
+      <li class="flex gap-4 rounded-lg border border-gray-200 p-5">
+        <Image
+          src={club.logo}
+          alt={`${club.name} logo`}
+          width={160}
+          class="h-20 w-20 shrink-0 object-contain"
+        />
+        <div>
+          <h2 class="text-xl font-semibold text-brand-blue">{club.name}</h2>
+          <dl class="mt-2 space-y-1 text-sm">
+            <div>
+              <dt class="inline font-semibold">Location: </dt>
+              <dd class="inline">{club.location}</dd>
+            </div>
+            <div>
+              <dt class="inline font-semibold">Contact: </dt>
+              <dd class="inline">{club.contact.name}</dd>
+            </div>
+            {club.contact.email && (
+              <div>
+                <dt class="inline font-semibold">Email: </dt>
+                <dd class="inline">
+                  <a href={`mailto:${club.contact.email}`} class="text-brand-blue underline">
+                    {club.contact.email}
+                  </a>
+                </dd>
+              </div>
+            )}
+            {club.contact.phone && (
+              <div>
+                <dt class="inline font-semibold">Phone: </dt>
+                <dd class="inline">{club.contact.phone}</dd>
+              </div>
+            )}
+            {club.website && (
+              <div>
+                <dt class="inline font-semibold">Website: </dt>
+                <dd class="inline">
+                  <a href={club.website} class="text-brand-blue underline">{club.website}</a>
+                </dd>
+              </div>
+            )}
+          </dl>
+        </div>
+      </li>
+    ))}
+  </ul>
 </BaseLayout>

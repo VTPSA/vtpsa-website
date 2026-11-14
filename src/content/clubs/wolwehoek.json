@@ -1,0 +1,11 @@
+{
+  "name": "Wolwehoek Shooting Club",
+  "logo": "./wolwehoek.png",
+  "website": "https://wolwehoekgunclub.co.za/",
+  "location": "Sasolburg, Freestate",
+  "contact": {
+    "name": "Fanie Otto",
+    "email": "fanie.otto@sasol.com",
+    "phone": "000 000 0000"
+  }
+}
