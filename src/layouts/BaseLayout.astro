@@ -1,0 +1,104 @@
+---
+import "../styles/global.css";
+import { Image } from "astro:assets";
+import logo from "../assets/logo.png";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Official website of the VTPSA." } = Astro.props;
+
+const siteName = "VTPSA";
+
+const links = [
+  { label: "Home", href: "/" },
+  { label: "Clubs", href: "/clubs/" },
+  { label: "Results", href: "/results/" },
+  { label: "Documents", href: "/documents/" },
+  { label: "Photos", href: "/photos/" },
+  { label: "Contact", href: "/contact/" },
+];
+
+const current = Astro.url.pathname.replace(/\/$/, "") || "/";
+
+function isActive(href: string) {
+  const target = href.replace(/\/$/, "") || "/";
+  if (target === "/") return current === "/";
+  return current === target || current.startsWith(target + "/");
+}
+
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title} | {siteName}</title>
+  </head>
+
+  <body class="flex min-h-screen flex-col font-sans text-gray-900">
+    <header class="border-b border-gray-200 bg-white">
+      <div class="mx-auto flex max-w-5xl items-center px-4 py-3">
+        <a href="/" class="flex items-center gap-4">
+          <Image src={logo} alt="VTPSA logo" width={120} class="h-14 w-auto" />
+          <span class="text-2xl font-bold text-brand-blue">{siteName}</span>
+        </a>
+      </div>
+    </header>
+
+    <nav class="bg-brand-blue" aria-label="Main">
+      <div class="mx-auto max-w-5xl px-4">
+        <button
+          id="menu-button"
+          type="button"
+          class="py-3 font-semibold text-white md:hidden"
+          aria-expanded="false"
+          aria-controls="menu"
+        >
+          ☰ Menu
+        </button>
+        <ul id="menu" class="hidden md:flex">
+          {links.map((link) => (
+            <li>
+              <a
+                href={link.href}
+                class:list={[
+                  "block border-b-4 px-4 py-3 font-semibold text-white hover:bg-brand-blue-light",
+                  isActive(link.href) ? "border-brand-orange" : "border-transparent",
+                ]}
+                aria-current={isActive(link.href) ? "page" : undefined}
+              >
+                {link.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </nav>
+
+    <main class="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
+      <slot />
+    </main>
+
+    <footer class="border-t-4 border-brand-red bg-gray-100">
+      <div class="mx-auto max-w-5xl px-4 py-6 text-sm text-gray-600">
+        © {year} {siteName}
+      </div>
+    </footer>
+
+    <script>
+      const button = document.getElementById("menu-button");
+      const menu = document.getElementById("menu");
+      button?.addEventListener("click", () => {
+        const open = menu?.classList.toggle("hidden") === false;
+        button?.setAttribute("aria-expanded", String(open));
+      });
+    </script>
+  </body>
+</html>
