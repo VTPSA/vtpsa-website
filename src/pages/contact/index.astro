@@ -1,8 +1,23 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import contact from "../../data/contact.json";
 ---
 
-<BaseLayout title="Contact Us">
-  <h1 class="text-3xl font-bold text-brand-blue">Clubs</h1>
-  <p class="mt-4">Coming soon.</p>
+<BaseLayout title="Contact">
+  <h1 class="text-3xl font-bold text-brand-blue">Contact</h1>
+  <p class="mt-4">
+    For general enquiries, please contact the chairman of {contact.organisation}.
+  </p>
+
+  <div class="mt-6 max-w-md rounded-lg border border-gray-200 border-l-4 border-l-brand-red p-6">
+    <p class="text-sm font-semibold uppercase tracking-wide text-gray-500">Chairman</p>
+    <p class="mt-1 text-xl font-semibold">
+      {contact.chairman.name} {contact.chairman.surname}
+    </p>
+    <p class="mt-2">
+      <a href={`mailto:${contact.chairman.email}`} class="text-brand-blue underline">
+        {contact.chairman.email}
+      </a>
+    </p>
+  </div>
 </BaseLayout>
